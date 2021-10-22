@@ -5,8 +5,10 @@ const Manager = require('./lib/Manager.js');
 const Engineer = require('./lib/Engineer.js');
 const Intern = require('./lib/Intern.js');
 
+//array to hold all employees added to team
 const team = [];
 
+//prompts for each employee type
 const managerQuestions = [
     {
         type: 'input',
@@ -183,7 +185,7 @@ function writeToFile(fileName, team) {
     });
 }
 
-function createTeam() {
+function addToTeam() {
     inquirer
         .prompt({
             type: 'list',
@@ -194,6 +196,7 @@ function createTeam() {
         // Prompt intern or engineer questions
         .then(({ employeeType }) => {
             if (employeeType === 'Finished building my team') {
+                //write html and conclude prompts
                 writeToFile('./dist/profile.html', team);
                 return;
             }
@@ -201,18 +204,24 @@ function createTeam() {
                 //prompt engineer questions
                 inquirer
                     .prompt(engineerQuestions)
-                    .then(({ engineerName, engineerId, engineerEmail, github }) => {
-                        team.push(new Engineer(engineerName, engineerId, engineerEmail, github))
-                        createTeam();
+                    .then(answers => {
+                        //add engineer to team array
+                        team.push(new Engineer(answers.engineerName, answers.engineerId, answers.engineerEmail, answers.github))
+                        
+                        //prompt to add another team member
+                        addToTeam();
                     })
             }
             else {
                 //prompt intern questions
                 inquirer
                     .prompt(internQuestions)
-                    .then(({ internName, internId, internEmail, school }) => {
-                        team.push(new Intern(internName, internId, internEmail, school))
-                        createTeam();
+                    .then(answers => {
+                        //add intern to team array
+                        team.push(new Intern(answers.internName, answers.internId, answers.internEmail, answers.school))
+                        
+                        //prompt to add another team member
+                        addToTeam();
                     })
             }
         })
@@ -222,9 +231,9 @@ function init() {
     console.log('Please build your team');
     inquirer
         .prompt(managerQuestions)
-        .then(({ managerName, managerId, managerEmail, office }) => {
-            team.push(new Manager(managerName, managerId, managerEmail, office))
-            createTeam();
+        .then(answers => {
+            team.push(new Manager(answers.managerName, answers.managerId, answers.managerEmail, answers.office))
+            addToTeam();
         })
 }
 
