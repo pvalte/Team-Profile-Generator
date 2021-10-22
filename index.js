@@ -1,11 +1,9 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const generateHtml = require('./src/html-template.js');
-const Employee = require('./lib/Employee.js');
 const Manager = require('./lib/Manager.js');
 const Engineer = require('./lib/Engineer.js');
 const Intern = require('./lib/Intern.js');
-const { create } = require('domain');
 
 const team = [];
 
@@ -175,8 +173,8 @@ const internQuestions = [
 ]
 
 // Function to write html file
-function writeToFile(fileName, managerData) {
-    const html = generateHtml(managerData);
+function writeToFile(fileName, team) {
+    const html = generateHtml(team);
 
     fs.writeFile(fileName, html, err => {
         if (err) throw new Error(err);
@@ -185,28 +183,18 @@ function writeToFile(fileName, managerData) {
     });
 }
 
-
-function createManager() {
-    console.log('Please build your team');
-    inquirer
-        .prompt(managerQuestions)
-        .then(({ managerName, managerId, managerEmail, office }) => {
-            team.push(new Manager(managerName, managerId, managerEmail, office))
-            createTeam();
-        })
-}
-
 function createTeam() {
     inquirer
         .prompt({
             type: 'list',
             message: 'What type of team member would you like to add?',
             name: 'employeeType',
-            choices: ['Engineer', 'Intern', "I don't want to add any more team members"]
+            choices: ['Engineer', 'Intern', 'Finished building my team']
         })
         // Prompt intern or engineer questions
         .then(({ employeeType }) => {
-            if (employeeType === "I don't want to add any more team members") {
+            if (employeeType === 'Finished building my team') {
+                writeToFile('./dist/profile.html', team);
                 return;
             }
             else if (employeeType === 'Engineer') {
@@ -230,23 +218,14 @@ function createTeam() {
         })
 }
 
-createManager();
+function init() {
+    console.log('Please build your team');
+    inquirer
+        .prompt(managerQuestions)
+        .then(({ managerName, managerId, managerEmail, office }) => {
+            team.push(new Manager(managerName, managerId, managerEmail, office))
+            createTeam();
+        })
+}
 
-
-
-
-
-
-
-
-
-
-// const employee = new Employee('Dave', '10', 'dave@gmail.com');
-// const manager = new Manager('Dave', '10', 'dave@gmail.com', '125');
-// const engineer = new Engineer('Dave', '10', 'dave@gmail.com', 'davethecoder');
-// const intern = new Intern('Dave', '10', 'dave@gmail.com', 'RRHS');
-
-// console.log(employee);
-// console.log(manager);
-// console.log(engineer);
-// console.log(intern);
+init();
